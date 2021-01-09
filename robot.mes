@@ -1,0 +1,61 @@
+import {Assertions as assert} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/utils/assertions.mes';
+
+export class AbstractRobot {
+
+}
+
+export class FourAxisRobot extends AbstractRobot {
+    constructor(baseAxis, lowerArmAxis, upperArmAxis, gripper, lowerArmHeight, lowerArmLength, upperArmLength, gripperLength) {
+
+    }
+}
+
+export class Axis {
+    constructor(leftEndSwitch, rightEndSwitch) {
+
+    }
+    async moveToLeftEndSwitch() {
+
+    }
+    async moveToRightEndSwitch() {
+
+    }
+    async reset() {
+
+    }
+}
+
+export class StepperAxis extends Axis {
+    constructor(stepper, leftEndSwitch, rightEndSwitch) {
+        super(leftEndSwitch, rightEndSwitch);
+        this.stepper = stepper;
+    }
+}
+
+export class ServoAxis extends Axis {
+
+}
+
+export class Gripper {
+    constructor(axis) {
+        assert.is_true(axis instanceof StepperAxis || axis instanceof ServoAxis, "axis should be an instance of StepperAxis or ServoAxis");
+    }
+
+    open_to(openingMm = 0) {
+
+    }
+
+    close() {
+        return this.open_to(0);
+    }
+
+    open() {
+        // move to endSwitch or if none move to open pos
+    }
+}
+
+export class VGripper extends Gripper {
+    constructor(axis, armLength) {
+
+    }
+}
