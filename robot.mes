@@ -15,9 +15,9 @@ export class AbstractRobot {
 
 export class FourAxisRobot extends AbstractRobot {
     constructor(baseAxis, lowerArmAxis, upperArmAxis, gripper, lowerArmHeight, lowerArmLength, upperArmLength) {
-        assert.is_instance_of(baseAxis, Axis, "baseAxis should be an instance of Axis");
-        assert.is_instance_of(lowerArmAxis, Axis, "lowerArmAxis should be an instance of Axis");
-        assert.is_instance_of(upperArmAxis, Axis, "upperArmAxis should be an instance of Axis");
+        assert.is_instance_of(baseAxis, AbstractAxis, "baseAxis should be an instance of AbstractAxis");
+        assert.is_instance_of(lowerArmAxis, AbstractAxis, "lowerArmAxis should be an instance of AbstractAxis");
+        assert.is_instance_of(upperArmAxis, AbstractAxis, "upperArmAxis should be an instance of AbstractAxis");
         assert.is_instance_of(gripper, Gripper, "gripper should be an instance of Gripper");
         assert.is_number(lowerArmHeight, "lowerArmHeight should be a Number (axis center height above ground in mm)");
         assert.is_number(lowerArmLength, "lowerArmLength should be a Number (length of lower arm between axis centers in mm)");
@@ -42,30 +42,30 @@ export class FourAxisRobot extends AbstractRobot {
     }
 }
 
-export class Axis {
+export class AbstractAxis {
     constructor(leftEndSwitch, rightEndSwitch) {
         assert.is_instance_of(leftEndSwitch, Button, "leftEndSwitch should be an instance of Button");
         assert.is_instance_of(rightEndSwitch, Button, "rightEndSwitch should be an instance of Button");
     }
 
     async moveToLeftEndSwitch() {
-        throw Error("NYI");
+        throw Error("Unimplemented, use a specific AbstractAxis class instead");
     }
 
     async moveToRightEndSwitch() {
-        throw Error("NYI");
+        throw Error("Unimplemented, use a specific AbstractAxis class instead");
     }
 
-    async set_zero() {
-        throw Error("NYI");
+    setZero() {
+        throw Error("Unimplemented, use a specific AbstractAxis class instead");
     }
 
     async zero() {
-        throw Error("NYI");
+        throw Error("Unimplemented, use a specific AbstractAxis class instead");
     }
 }
 
-export class StepperAxis extends Axis {
+export class StepperAxis extends AbstractAxis {
     constructor(stepper, leftEndSwitch, rightEndSwitch) {
         super(leftEndSwitch, rightEndSwitch);
         this.stepper = stepper;
@@ -79,7 +79,7 @@ export class StepperAxis extends Axis {
         throw Error("NYI");
     }
 
-    async set_zero() {
+    setZero() {
         throw Error("NYI");
     }
 
@@ -88,7 +88,7 @@ export class StepperAxis extends Axis {
     }
 }
 
-export class ServoAxis extends Axis {
+export class ServoAxis extends AbstractAxis {
     constructor(servo, leftEndSwitch, rightEndSwitch) {
         super(leftEndSwitch, rightEndSwitch);
         this.servo = servo;
@@ -102,7 +102,7 @@ export class ServoAxis extends Axis {
         throw Error("NYI");
     }
 
-    async set_zero() {
+    setZero() {
         throw Error("NYI");
     }
 
@@ -121,22 +121,22 @@ export class Gripper {
         this.axis = axis;
     }
 
-    open_to(openingMm = 0) {
+    async open_to(openingMm = 0) {
         throw Error("NYI, use a VGripper or LinearGripper instead");
     }
 
-    close() {
+    async close() {
         return this.open_to(0);
     }
 
-    open() {
+    async open() {
         // move to endSwitch or if none move to open pos
 
         return this.open_to()
 
     }
 
-    zero() {
+    async zero() {
         return this.axis.zero();
     }
 }
@@ -147,7 +147,7 @@ export class LinearGripper extends Gripper {
         this.openingMm = openingMm;
     }
 
-    open_to(openingMm = 0) {
+    async open_to(openingMm = 0) {
         // todo calc based on linear length?
     }
 }
@@ -163,11 +163,11 @@ export class VGripper extends Gripper {
         this.maxOpenSequences = maxOpenSequences;
     }
 
-    open_to(openingMm = 0) {
+    async open_to(openingMm = 0) {
         // calculate steps based on steps per rev / armLength
     }
 
-    open() {
+    async open() {
         // run max seqs
     }
 }
