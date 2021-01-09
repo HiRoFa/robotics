@@ -1,27 +1,67 @@
 import {Assertions as assert} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/utils/assertions.mes';
+import {Stepper} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/io/gpio/stepper.mes'
+import {Led} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/io/gpio/led.mes'
+import {Servo} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/io/gpio/servo.mes'
+import {Button} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/io/gpio/button.mes'
 
 export class AbstractRobot {
-
+    constructor() {
+        //
+    }
+    async zero() {
+        throw Error("Unimplemented, use a specific Robot class instead");
+    }
 }
 
 export class FourAxisRobot extends AbstractRobot {
-    constructor(baseAxis, lowerArmAxis, upperArmAxis, gripper, lowerArmHeight, lowerArmLength, upperArmLength, gripperLength) {
+    constructor(baseAxis, lowerArmAxis, upperArmAxis, gripper, lowerArmHeight, lowerArmLength, upperArmLength) {
+        assert.is_instance_of(baseAxis, Axis, "baseAxis should be an instance of Axis");
+        assert.is_instance_of(lowerArmAxis, Axis, "lowerArmAxis should be an instance of Axis");
+        assert.is_instance_of(upperArmAxis, Axis, "upperArmAxis should be an instance of Axis");
+        assert.is_instance_of(gripper, Gripper, "gripper should be an instance of Gripper");
+        assert.is_number(lowerArmHeight, "lowerArmHeight should be a Number (axis center height above ground in mm)");
+        assert.is_number(lowerArmLength, "lowerArmLength should be a Number (length of lower arm between axis centers in mm)");
+        assert.is_number(upperArmLength, "upperArmLength should be a Number (length of upper arm between axis centers in mm)");
 
+        this.baseAxis = baseAxis;
+        this.lowerArmAxis = lowerArmAxis;
+        this.upperArmAxis = upperArmAxis;
+        this.gripper = gripper;
+        this.lowerArmHeight = lowerArmHeight;
+        this.lowerArmLength = lowerArmLength;
+        this.upperArmLength = upperArmLength;
+    }
+
+    async zero() {
+        return Promise.all([
+            this.baseAxis.zero(),
+            this.lowerArmAxis.zero(),
+            this.upperArmAxis.zero(),
+            this.gripper.zero()
+        ]);
     }
 }
 
 export class Axis {
     constructor(leftEndSwitch, rightEndSwitch) {
-
+        assert.is_instance_of(leftEndSwitch, Button, "leftEndSwitch should be an instance of Button");
+        assert.is_instance_of(rightEndSwitch, Button, "rightEndSwitch should be an instance of Button");
     }
+
     async moveToLeftEndSwitch() {
-
+        throw Error("NYI");
     }
+
     async moveToRightEndSwitch() {
-
+        throw Error("NYI");
     }
-    async reset() {
 
+    async set_zero() {
+        throw Error("NYI");
+    }
+
+    async zero() {
+        throw Error("NYI");
     }
 }
 
@@ -30,19 +70,59 @@ export class StepperAxis extends Axis {
         super(leftEndSwitch, rightEndSwitch);
         this.stepper = stepper;
     }
+
+    async moveToLeftEndSwitch() {
+        throw Error("NYI");
+    }
+
+    async moveToRightEndSwitch() {
+        throw Error("NYI");
+    }
+
+    async set_zero() {
+        throw Error("NYI");
+    }
+
+    async zero() {
+        throw Error("NYI");
+    }
 }
 
 export class ServoAxis extends Axis {
+    constructor(servo, leftEndSwitch, rightEndSwitch) {
+        super(leftEndSwitch, rightEndSwitch);
+        this.servo = servo;
+    }
+
+    async moveToLeftEndSwitch() {
+        throw Error("NYI");
+    }
+
+    async moveToRightEndSwitch() {
+        throw Error("NYI");
+    }
+
+    async set_zero() {
+        throw Error("NYI");
+    }
+
+    async zero() {
+        throw Error("NYI");
+    }
 
 }
 
 export class Gripper {
     constructor(axis) {
-        assert.is_true(axis instanceof StepperAxis || axis instanceof ServoAxis, "axis should be an instance of StepperAxis or ServoAxis");
+        assert.is_true(
+            axis instanceof StepperAxis || axis instanceof ServoAxis,
+            "axis should be an instance of StepperAxis or ServoAxis"
+        );
+        this.axis = axis;
     }
 
     open_to(openingMm = 0) {
-
+        throw Error("NYI, use a VGripper or LinearGripper instead");
     }
 
     close() {
@@ -51,11 +131,43 @@ export class Gripper {
 
     open() {
         // move to endSwitch or if none move to open pos
+
+        return this.open_to()
+
+    }
+
+    zero() {
+        return this.axis.zero();
+    }
+}
+
+export class LinearGripper extends Gripper {
+    constructor(axis, openingMm = -1) {
+        super(axis);
+        this.openingMm = openingMm;
+    }
+
+    open_to(openingMm = 0) {
+        // todo calc based on linear length?
     }
 }
 
 export class VGripper extends Gripper {
-    constructor(axis, armLength) {
+    constructor(axis, armLength, maxOpenSequences) {
+        super(axis);
 
+        assert.is_number(armLength, "armLength should be a number (in mm)");
+        assert.is_number(maxOpenSequences, "maxOpenSequences should be a number (number of sequences to fully open)");
+
+        this.armLength = armLength;
+        this.maxOpenSequences = maxOpenSequences;
+    }
+
+    open_to(openingMm = 0) {
+        // calculate steps based on steps per rev / armLength
+    }
+
+    open() {
+        // run max seqs
     }
 }
