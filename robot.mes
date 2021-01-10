@@ -4,7 +4,11 @@ import {Led} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modu
 import {Servo} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/io/gpio/servo.mes'
 import {Button} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/io/gpio/button.mes'
 
+/**
+ * abstract base class for all Robots
+ **/
 export class AbstractRobot {
+
     constructor() {
         //
     }
@@ -13,40 +17,51 @@ export class AbstractRobot {
     }
 }
 
+/**
+ * a simple 4 axis robot consisting of a rotating base, 2 arms and a Gripper
+ * this class is developed and tested using an EEZYbotArm MK3
+ * https://www.thingiverse.com/thing:2838859
+ **/
 export class FourAxisRobot extends AbstractRobot {
-    constructor(baseAxis, lowerArmAxis, upperArmAxis, gripper, lowerArmHeight, lowerArmLength, upperArmLength) {
+    // todo: things like min and max angle per arm, in order to know where it is on zero and calculate target coordinates
+    // put that and stuff like armLength in a dedicated Arm class which extends StepperAxis
+    constructor(baseAxis, lowerArm, upperArm, gripper, lowerArmHeight) {
         assert.is_instance_of(baseAxis, AbstractAxis, "baseAxis should be an instance of AbstractAxis");
-        assert.is_instance_of(lowerArmAxis, AbstractAxis, "lowerArmAxis should be an instance of AbstractAxis");
-        assert.is_instance_of(upperArmAxis, AbstractAxis, "upperArmAxis should be an instance of AbstractAxis");
+        assert.is_instance_of(lowerArm, Arm, "lowerArm should be an instance of Arm");
+        assert.is_instance_of(upperArm, Arm, "upperArm should be an instance of Arm");
         assert.is_instance_of(gripper, Gripper, "gripper should be an instance of Gripper");
         assert.is_number(lowerArmHeight, "lowerArmHeight should be a Number (axis center height above ground in mm)");
-        assert.is_number(lowerArmLength, "lowerArmLength should be a Number (length of lower arm between axis centers in mm)");
-        assert.is_number(upperArmLength, "upperArmLength should be a Number (length of upper arm between axis centers in mm)");
 
         this.baseAxis = baseAxis;
-        this.lowerArmAxis = lowerArmAxis;
-        this.upperArmAxis = upperArmAxis;
+        this.lowerArm = lowerArm;
+        this.upperArm = upperArm;
         this.gripper = gripper;
-        this.lowerArmHeight = lowerArmHeight;
-        this.lowerArmLength = lowerArmLength;
         this.upperArmLength = upperArmLength;
     }
 
     async zero() {
         return Promise.all([
             this.baseAxis.zero(),
-            this.lowerArmAxis.zero(),
-            this.upperArmAxis.zero(),
+            this.lowerArm.zero(),
+            this.upperArm.zero(),
             this.gripper.zero()
         ]);
     }
 }
 
 export class AbstractAxis {
-    constructor(leftEndSwitch, rightEndSwitch) {
+    constructor(leftEndSwitch, rightEndSwitch, maxRightAngle) {
         assert.is_instance_of(leftEndSwitch, Button, "leftEndSwitch should be an instance of Button");
         assert.is_instance_of(rightEndSwitch, Button, "rightEndSwitch should be an instance of Button");
+        assert.is_number(maxRightAngle, "maxRightAngle should be a Number");
+
+        this.leftEndSwitch = leftEndSwitch;
+        this.rightEndSwitch = rightEndSwitch;
+        this.maxRightAngle = maxRightAngle;
+
     }
+
+    // todo methods like rotate(rotations) / rotate_angle(angle) / step?
 
     async moveToLeftEndSwitch() {
         throw Error("Unimplemented, use a specific AbstractAxis class instead");
@@ -56,6 +71,9 @@ export class AbstractAxis {
         throw Error("Unimplemented, use a specific AbstractAxis class instead");
     }
 
+    /**
+    * set the current position as zero, the Axis will remember all motion as a single angle and attemt to reset to that position when zer() is called
+    */
     setZero() {
         throw Error("Unimplemented, use a specific AbstractAxis class instead");
     }
@@ -66,9 +84,14 @@ export class AbstractAxis {
 }
 
 export class StepperAxis extends AbstractAxis {
-    constructor(stepper, leftEndSwitch, rightEndSwitch) {
+    constructor(stepper, gearReduction, leftEndSwitch, rightEndSwitch) {
         super(leftEndSwitch, rightEndSwitch);
+
+        assert.is_instance_of(stepper, Stepper, "stepper should be an instance of Stepper");
+        assert.is_number(gearReduction, "gearReduction should be a Number");
+
         this.stepper = stepper;
+        this.gearReduction = gearReduction;
     }
 
     async moveToLeftEndSwitch() {
@@ -80,10 +103,12 @@ export class StepperAxis extends AbstractAxis {
     }
 
     setZero() {
-        throw Error("NYI");
+        this.sequencesMoved = 0;
     }
 
     async zero() {
+        // step sequences in direction based on negative or positive val
+        // call setZero, allthough if wedo this correct the val will be 0
         throw Error("NYI");
     }
 }
@@ -110,6 +135,17 @@ export class ServoAxis extends AbstractAxis {
         throw Error("NYI");
     }
 
+}
+
+export class Arm {
+    constructor(axis, armLength){
+        assert.is_true(
+            axis instanceof StepperAxis || axis instanceof ServoAxis,
+            "axis should be an instance of StepperAxis or ServoAxis"
+        );
+        this.axis = axis;
+        this.armLength = armLength;
+    }
 }
 
 export class Gripper {
