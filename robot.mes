@@ -70,20 +70,34 @@ export class FourAxisRobot extends AbstractRobot {
             let rad = Math.atan2(x, y); // In radians
             let deg = rad * (180 / Math.PI);
 
-
             return Promise.all([
-                this.rotateAngle(deg) // todo other 2 movements
+                this.rotateBaseAngle(deg) // todo other 2 movements
             ]);
-
 
         });
     }
 
-    async rotateAngle(angle = 0) {
+    /**
+    * rotate the base by a number of degrees relative to the current position
+    */
+    async rotateBaseAngle(angle = 0) {
         assert.is_number(angle, "angle should be a number between -180 and 180");
         assert.is_true(angle => -180 && angle <= 180, "angle should be a number between -180 and 180");
 
         return this.baseAxis.rotateDegrees(angle);
+
+    }
+
+    /**
+    * set the base by a number of degrees relative to the "zero" position
+    */
+    async setBaseAngle(angle = 0) {
+        assert.is_number(angle, "angle should be a number between -180 and 180");
+        assert.is_true(angle => -180 && angle <= 180, "angle should be a number between -180 and 180");
+
+        return this.baseAxis.zero().then(() => {
+            return this.baseAxis.rotateDegrees(angle);
+        });
 
     }
 
