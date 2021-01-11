@@ -56,6 +56,41 @@ export class FourAxisRobot extends AbstractRobot {
             this.gripper.zero()
         ]);
     }
+
+    /**
+    * move the grip point to a coordinate
+    * throws an UnreachableError if position can not be reached
+    **/
+    async moveTo(x, y, z) {
+        return this.zero().then(() => {
+            // movement from zero here, todo add relative position to axis which calculate based on current offset from zero
+
+            // rotate base
+
+            let rad = Math.atan2(x, y); // In radians
+            let deg = rad * (180 / Math.PI);
+
+
+            return Promise.all([
+                this.rotateAngle(deg) // todo other 2 movements
+            ]);
+
+
+        });
+    }
+
+    async rotateAngle(angle = 0) {
+        assert.is_number(angle, "angle should be a number between -180 and 180");
+        assert.is_true(angle => -180 && angle <= 180, "angle should be a number between -180 and 180");
+
+        return this.baseAxis.rotateDegrees(angle);
+
+    }
+
+    async gripperTo(mm = 0) {
+        return this.gripper.openTo(mm);
+    }
+
 }
 
 export class AbstractAxis {
