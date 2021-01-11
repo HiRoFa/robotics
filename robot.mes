@@ -4,6 +4,8 @@ import {Led} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modu
 import {Servo} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/io/gpio/servo.mes'
 import {Button} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/io/gpio/button.mes'
 
+export {Stepper, Led, Servo, Button};
+
 /**
  * abstract base class for all Robots
  **/
@@ -39,6 +41,13 @@ export class FourAxisRobot extends AbstractRobot {
         this.upperArmLength = upperArmLength;
     }
 
+    setZero() {
+        this.baseAxis.setZero();
+        this.lowerArm.setZero();
+        this.upperArm.setZero();
+        this.gripper.setZero();
+    }
+
     async zero() {
         return Promise.all([
             this.baseAxis.zero(),
@@ -72,12 +81,15 @@ export class AbstractAxis {
     }
 
     /**
-    * set the current position as zero, the Axis will remember all motion as a single angle and attemt to reset to that position when zer() is called
+    * set the current position as the "zero" position, the Axis will remember all motion and attempt to reset to this position when zero() is called
     */
     setZero() {
         throw Error("Unimplemented, use a specific AbstractAxis class instead");
     }
 
+    /**
+    * return to the "zero" position
+    **/
     async zero() {
         throw Error("Unimplemented, use a specific AbstractAxis class instead");
     }
@@ -103,13 +115,11 @@ export class StepperAxis extends AbstractAxis {
     }
 
     setZero() {
-        this.sequencesMoved = 0;
+        this.stepper.setZero();
     }
 
     async zero() {
-        // step sequences in direction based on negative or positive val
-        // call setZero, allthough if wedo this correct the val will be 0
-        throw Error("NYI");
+        return this.stepper.zero();
     }
 }
 
@@ -146,6 +156,14 @@ export class Arm {
         this.axis = axis;
         this.armLength = armLength;
     }
+
+    setZero() {
+        this.axis.setZero();
+    }
+
+    async zero() {
+        return this.axis.zero();
+    }
 }
 
 export class Gripper {
@@ -157,7 +175,7 @@ export class Gripper {
         this.axis = axis;
     }
 
-    async open_to(openingMm = 0) {
+    async openTo(openingMm = 0) {
         throw Error("NYI, use a VGripper or LinearGripper instead");
     }
 
@@ -172,6 +190,10 @@ export class Gripper {
 
     }
 
+    setZero() {
+        this.axis.setZero();
+    }
+
     async zero() {
         return this.axis.zero();
     }
@@ -183,7 +205,7 @@ export class LinearGripper extends Gripper {
         this.openingMm = openingMm;
     }
 
-    async open_to(openingMm = 0) {
+    async openTo(openingMm = 0) {
         // todo calc based on linear length?
     }
 }
@@ -199,7 +221,7 @@ export class VGripper extends Gripper {
         this.maxOpenSequences = maxOpenSequences;
     }
 
-    async open_to(openingMm = 0) {
+    async openTo(openingMm = 0) {
         // calculate steps based on steps per rev / armLength
     }
 
