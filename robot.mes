@@ -95,9 +95,8 @@ export class FourAxisRobot extends AbstractRobot {
         assert.is_number(angle, "angle should be a number between -180 and 180");
         assert.is_true(angle => -180 && angle <= 180, "angle should be a number between -180 and 180");
 
-        return this.baseAxis.zero().then(() => {
-            return this.baseAxis.rotateDegrees(angle);
-        });
+        await this.baseAxis.zero();
+        await this.baseAxis.rotateDegrees(angle);
 
     }
 
