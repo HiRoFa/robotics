@@ -33,12 +33,9 @@ async function init_robot() {
     
 }
 
-init_robot().then((robot) => {
-    robot.zero()
-    .then(() => {
-        console.log("robot initialized an zeroed");
-    });
-    
+init_robot().then(async (robot) => {
+    await robot.zero();
+    console.log("robot initialized an zeroed");
 });
 
 
