@@ -1,4 +1,5 @@
 import {Assertions as assert} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/utils/assertions.mes';
+import {Utils as utils} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/utils/utils.mes';
 import {Stepper} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/io/gpio/stepper.mes'
 import {Led} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/io/gpio/led.mes'
 import {Servo} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/io/gpio/servo.mes'
