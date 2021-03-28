@@ -1,10 +1,10 @@
 # robotics
-robotics project for use in ESses
+robotics project for use in GreenCopper
 
 # example
 
 ```javascript
-import {Utils as utils} from 'https://raw.githubusercontent.com/HiRoFa/ESsesLib-q/main/modules/utils/utils.mes';
+import {Utils as utils} from 'https://raw.githubusercontent.com/HiRoFa/GreenCopperRuntime/main/modules/utils/utils.mes';
 
 async function init_robot() {
     // import robotics module
