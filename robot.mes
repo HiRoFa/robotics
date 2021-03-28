@@ -20,6 +20,14 @@ export class AbstractRobot {
     }
 }
 
+export class FourAxisRobotModel {
+    constructor() {
+
+    }
+}
+
+export const EEZYbotArmMK3 = new FourAxisRobotModel();
+
 /**
  * a simple 4 axis robot consisting of a rotating base, 2 arms and a Gripper
  * this class is developed and tested using an EEZYbotArm MK3
